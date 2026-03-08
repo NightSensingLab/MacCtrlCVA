@@ -1,77 +1,127 @@
 # MacCtrlCVA
 
-MacCtrlCVA is a lightweight macOS menu bar utility that remaps Windows-style `Ctrl+C`, `Ctrl+V`, `Ctrl+A`, and `Ctrl+Z` into native macOS `Command+C`, `Command+V`, `Command+A`, and `Command+Z`.
+MacCtrlCVA is a lightweight macOS menu bar utility that lets Windows-style `Ctrl` shortcuts work like native macOS `Command` shortcuts.
 
-## Project architecture
+It is built for people who switch between Windows and macOS and want their copy, paste, select-all, and undo muscle memory to keep working.
 
-- `MacCtrlCVA/AppDelegate.swift`: Menu bar app bootstrap, menu actions, enable/disable toggle, launch-at-login toggle.
-- `MacCtrlCVA/EventTapManager.swift`: Quartz event tap setup and global `keyDown` interception.
-- `MacCtrlCVA/AccessibilityPermissionManager.swift`: Accessibility trust check and permission prompt.
-- `MacCtrlCVA/LaunchAtLoginManager.swift`: `SMAppService.mainApp` wrapper for login item registration.
-- `MacCtrlCVA/Info.plist`: Background-agent app configuration (`LSUIElement`).
-- `MacCtrlCVA.xcodeproj`: Xcode project file.
+## Features
 
-## Keyboard remapping logic
+- Remaps `Ctrl+C` to `Command+C`
+- Remaps `Ctrl+V` to `Command+V`
+- Remaps `Ctrl+A` to `Command+A`
+- Remaps `Ctrl+Z` to `Command+Z`
+- Uses physical `keyCode`, so it works across input methods like English and Chinese Pinyin
+- Runs as a lightweight menu bar app
+- Supports enable / disable from the menu bar
+- Supports launch at login
 
-The event tap listens for global `keyDown` events only. For each event:
+## How It Works
 
-1. Read the physical `keyCode`.
-2. Check that `Control` is pressed.
-3. Check that `Command` is not pressed.
-4. Match the `keyCode` against:
-   - `A = 0`
-   - `C = 8`
-   - `V = 9`
-   - `Z = 6`
-5. Suppress the original event.
-6. Post synthetic `Command` key down/up events with the same `keyCode`.
+MacCtrlCVA uses a global Quartz Event Tap to listen for `keyDown` events system-wide.
 
-Because the logic uses `keyCode` instead of characters, it remains stable across input methods like English and Chinese Pinyin.
+When all of the following are true:
 
-## Accessibility permission
+- `Control` is pressed
+- `Command` is not pressed
+- The pressed `keyCode` matches one of the supported shortcuts
 
-This app uses a Quartz event tap and posts synthetic keyboard events, so macOS requires Accessibility permission.
+the app:
 
-1. Launch the app.
-2. When prompted, open System Settings.
-3. Go to `Privacy & Security` -> `Accessibility`.
-4. Enable access for `MacCtrlCVA`.
-5. Quit and relaunch the app if macOS does not activate the permission immediately.
+1. Suppresses the original event
+2. Posts a synthetic event with the `Command` modifier instead
 
-## Build and run in Xcode
+Supported key codes:
 
-1. Open [MacCtrlCVA.xcodeproj](/Users/maguamale/Projects/MacCtrlCVA/MacCtrlCVA.xcodeproj) in Xcode.
-2. Select the `MacCtrlCVA` target.
-3. Set your own signing team in `Signing & Capabilities`.
-4. Build and run.
-5. After launch, a keyboard icon appears in the menu bar.
-6. Grant Accessibility permission when prompted.
-7. Use the menu bar menu to enable or disable remapping and to toggle launch at login.
+- `A = 0`
+- `C = 8`
+- `V = 9`
+- `Z = 6`
 
-## Create a DMG
+This keeps the remapping stable regardless of the active input method.
 
-To build a release app and package it as a DMG:
+## Requirements
+
+- macOS 13 or later
+- Accessibility permission enabled for the app
+- Full Xcode if you want to build from source
+
+## Install
+
+### Option 1: Download a release
+
+1. Download the latest `.dmg` from the [Releases](https://github.com/NightSensingLab/MacCtrlCVA/releases) page.
+2. Open the DMG.
+3. Drag `MacCtrlCVA.app` into `Applications`.
+4. Launch the app.
+
+If macOS blocks the app on first launch:
+
+1. Right-click `MacCtrlCVA.app`
+2. Click `Open`
+3. Confirm the security prompt
+
+### Option 2: Build from source
+
+1. Open [MacCtrlCVA.xcodeproj](/Users/maguamale/Projects/MacCtrlCVA/MacCtrlCVA.xcodeproj) in Xcode
+2. Select the `MacCtrlCVA` target
+3. Set your signing team in `Signing & Capabilities`
+4. Build and run
+
+## First Run Setup
+
+MacCtrlCVA needs Accessibility permission to monitor and post keyboard events.
+
+1. Launch `MacCtrlCVA`
+2. Open `System Settings`
+3. Go to `Privacy & Security` -> `Accessibility`
+4. Enable access for `MacCtrlCVA`
+5. Quit and relaunch the app if needed
+
+After permission is granted, the menu bar app will start remapping shortcuts system-wide.
+
+## Menu Bar Controls
+
+The menu bar app includes:
+
+- Enable / disable remapping
+- Launch at login toggle
+- Quick access to the Accessibility permission flow
+- Quit action
+
+## Build a DMG
+
+You can package the app into a DMG with:
 
 ```bash
 chmod +x scripts/make-dmg.sh
 ./scripts/make-dmg.sh
 ```
 
-The script:
+The script will:
 
-1. Builds the `MacCtrlCVA` scheme in `Release`
-2. Copies `MacCtrlCVA.app` into a DMG staging folder
-3. Adds an `Applications` symlink for drag-and-drop install
-4. Writes the final DMG to `release/MacCtrlCVA.dmg`
+1. Build the app in `Release`
+2. Copy `MacCtrlCVA.app` into a staging folder
+3. Add an `Applications` shortcut
+4. Create `release/MacCtrlCVA.dmg`
 
-If you want a different build configuration, run:
+To build a debug DMG instead:
 
 ```bash
 CONFIGURATION=Debug ./scripts/make-dmg.sh
 ```
 
+## Project Structure
+
+- `MacCtrlCVA/AppDelegate.swift`: menu bar app bootstrap and menu actions
+- `MacCtrlCVA/EventTapManager.swift`: global keyboard interception and remapping
+- `MacCtrlCVA/AccessibilityPermissionManager.swift`: permission checks and prompt flow
+- `MacCtrlCVA/LaunchAtLoginManager.swift`: launch-at-login integration
+- `MacCtrlCVA/Info.plist`: app metadata and background app configuration
+- `scripts/make-dmg.sh`: local DMG packaging script
+
 ## Notes
 
-- The app does not remap anything when `Command` is already held, so native macOS shortcuts continue to work.
-- The app is a menu bar background app and does not show a Dock icon.
-- Launch at login uses `SMAppService.mainApp`, which requires macOS 13 or newer.
+- Native macOS shortcuts are preserved when `Command` is already pressed
+- The app runs in the menu bar and does not show a Dock icon
+- Launch at login uses `SMAppService.mainApp`
+- For open source distribution without paid Apple signing, users may need to manually confirm the app on first launch
