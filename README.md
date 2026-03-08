@@ -48,6 +48,28 @@ This app uses a Quartz event tap and posts synthetic keyboard events, so macOS r
 6. Grant Accessibility permission when prompted.
 7. Use the menu bar menu to enable or disable remapping and to toggle launch at login.
 
+## Create a DMG
+
+To build a release app and package it as a DMG:
+
+```bash
+chmod +x scripts/make-dmg.sh
+./scripts/make-dmg.sh
+```
+
+The script:
+
+1. Builds the `MacCtrlCVA` scheme in `Release`
+2. Copies `MacCtrlCVA.app` into a DMG staging folder
+3. Adds an `Applications` symlink for drag-and-drop install
+4. Writes the final DMG to `release/MacCtrlCVA.dmg`
+
+If you want a different build configuration, run:
+
+```bash
+CONFIGURATION=Debug ./scripts/make-dmg.sh
+```
+
 ## Notes
 
 - The app does not remap anything when `Command` is already held, so native macOS shortcuts continue to work.
