@@ -13,6 +13,7 @@
 		6A0000020000000000000001 /* AccessibilityPermissionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A0001020000000000000001 /* AccessibilityPermissionManager.swift */; };
 		6A0000030000000000000001 /* EventTapManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A0001030000000000000001 /* EventTapManager.swift */; };
 		6A0000040000000000000001 /* LaunchAtLoginManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A0001040000000000000001 /* LaunchAtLoginManager.swift */; };
+		6A0000090000000000000001 /* InputSourceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A00010A0000000000000001 /* InputSourceManager.swift */; };
 		6A0000050000000000000001 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A0001050000000000000001 /* Cocoa.framework */; };
 		6A0000060000000000000001 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A0001060000000000000001 /* ApplicationServices.framework */; };
 		6A0000070000000000000001 /* ServiceManagement.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A0001070000000000000001 /* ServiceManagement.framework */; };
@@ -32,6 +33,7 @@
 		6A0001070000000000000001 /* ServiceManagement.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ServiceManagement.framework; path = System/Library/Frameworks/ServiceManagement.framework; sourceTree = SDKROOT; };
 		6A0001080000000000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		6A0001090000000000000001 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		6A00010A0000000000000001 /* InputSourceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputSourceManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +66,7 @@
 				6A0001010000000000000001 /* AppDelegate.swift */,
 				6A0001020000000000000001 /* AccessibilityPermissionManager.swift */,
 				6A0001030000000000000001 /* EventTapManager.swift */,
+				6A00010A0000000000000001 /* InputSourceManager.swift */,
 				6A0001040000000000000001 /* LaunchAtLoginManager.swift */,
 				6A0001080000000000000001 /* Info.plist */,
 				5A18F34B2F5D4D4F00E99C16 /* Assets.xcassets */,
@@ -163,6 +166,7 @@
 				6A0000010000000000000001 /* AppDelegate.swift in Sources */,
 				6A0000020000000000000001 /* AccessibilityPermissionManager.swift in Sources */,
 				6A0000030000000000000001 /* EventTapManager.swift in Sources */,
+				6A0000090000000000000001 /* InputSourceManager.swift in Sources */,
 				6A0000040000000000000001 /* LaunchAtLoginManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -180,7 +184,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -192,7 +196,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.maguamale.MacCtrlCVA;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -211,7 +215,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -223,7 +227,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.magamale.MacCtrlCVA;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;

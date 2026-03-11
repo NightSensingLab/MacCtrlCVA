@@ -11,6 +11,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let accessibilityMenuItem = NSMenuItem(title: "Grant Accessibility Access", action: #selector(requestAccessibilityPermission), keyEquivalent: "")
     private let enableMenuItem = NSMenuItem(title: "Enable Remapping", action: #selector(toggleEnabled), keyEquivalent: "")
     private let launchAtLoginMenuItem = NSMenuItem(title: "Launch at Login", action: #selector(toggleLaunchAtLogin), keyEquivalent: "")
+    private let aboutMenuItem = NSMenuItem(title: "About MacCtrlCVA", action: #selector(showAbout), keyEquivalent: "")
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         print("MacCtrlCVA launched")
@@ -43,10 +44,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         accessibilityMenuItem.target = self
         enableMenuItem.target = self
         launchAtLoginMenuItem.target = self
+        aboutMenuItem.target = self
         launchAtLoginMenuItem.state = launchAtLoginManager.isEnabled ? .on : .off
 
         menu.addItem(statusMenuItem)
         menu.addItem(.separator())
+        menu.addItem(aboutMenuItem)
         menu.addItem(accessibilityMenuItem)
         menu.addItem(enableMenuItem)
         menu.addItem(launchAtLoginMenuItem)
@@ -120,6 +123,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             alert.addButton(withTitle: "OK")
             alert.runModal()
         }
+    }
+
+    @objc
+    private func showAbout() {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Unknown"
+        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "Unknown"
+
+        showAlert(
+            title: "About MacCtrlCVA",
+            message: """
+            Version \(version) (\(build))
+
+            Windows-style shortcut remapping for macOS:
+            Ctrl+C/V/A/Z, Option+Tab, and Ctrl+Shift input switching.
+            """
+        )
     }
 
     @objc

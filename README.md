@@ -2,7 +2,7 @@
 
 MacCtrlCVA is a lightweight macOS menu bar utility that lets Windows-style `Ctrl` shortcuts work like native macOS `Command` shortcuts.
 
-It is built for people who switch between Windows and macOS and want their copy, paste, select-all, and undo muscle memory to keep working.
+It is built for people who switch between Windows and macOS and want their copy, paste, select-all, undo, app switching, and input method muscle memory to keep working.
 
 ## Features
 
@@ -10,14 +10,17 @@ It is built for people who switch between Windows and macOS and want their copy,
 - Remaps `Ctrl+V` to `Command+V`
 - Remaps `Ctrl+A` to `Command+A`
 - Remaps `Ctrl+Z` to `Command+Z`
+- Remaps `Option+Tab` to `Command+Tab` for Windows-style app switching
+- Remaps `Ctrl+Shift` to switch to the next enabled input source
 - Uses physical `keyCode`, so it works across input methods like English and Chinese Pinyin
 - Runs as a lightweight menu bar app
 - Supports enable / disable from the menu bar
 - Supports launch at login
+- Includes an `About` item in the menu bar menu
 
 ## How It Works
 
-MacCtrlCVA uses a global Quartz Event Tap to listen for `keyDown` events system-wide.
+MacCtrlCVA uses a global Quartz Event Tap to listen for `keyDown` and `flagsChanged` events system-wide.
 
 When all of the following are true:
 
@@ -38,6 +41,8 @@ Supported key codes:
 - `Z = 6`
 
 This keeps the remapping stable regardless of the active input method.
+
+For input source switching, the app uses macOS input source APIs directly instead of simulating characters, so `Ctrl+Shift` can rotate through enabled keyboard input sources reliably.
 
 ## Requirements
 
@@ -83,6 +88,7 @@ After permission is granted, the menu bar app will start remapping shortcuts sys
 
 The menu bar app includes:
 
+- About dialog with version information
 - Enable / disable remapping
 - Launch at login toggle
 - Quick access to the Accessibility permission flow
@@ -114,6 +120,7 @@ CONFIGURATION=Debug ./scripts/make-dmg.sh
 
 - `MacCtrlCVA/AppDelegate.swift`: menu bar app bootstrap and menu actions
 - `MacCtrlCVA/EventTapManager.swift`: global keyboard interception and remapping
+- `MacCtrlCVA/InputSourceManager.swift`: keyboard input source enumeration and switching
 - `MacCtrlCVA/AccessibilityPermissionManager.swift`: permission checks and prompt flow
 - `MacCtrlCVA/LaunchAtLoginManager.swift`: launch-at-login integration
 - `MacCtrlCVA/Info.plist`: app metadata and background app configuration
@@ -122,6 +129,7 @@ CONFIGURATION=Debug ./scripts/make-dmg.sh
 ## Notes
 
 - Native macOS shortcuts are preserved when `Command` is already pressed
+- `Option+Tab` is intentionally remapped to `Command+Tab` to match the Windows `Alt+Tab` habit
 - The app runs in the menu bar and does not show a Dock icon
 - Launch at login uses `SMAppService.mainApp`
 - For open source distribution without paid Apple signing, users may need to manually confirm the app on first launch
