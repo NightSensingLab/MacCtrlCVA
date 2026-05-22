@@ -7,6 +7,7 @@ final class EventTapManager {
         case a = 0
         case c = 8
         case v = 9
+        case x = 7
         case z = 6
     }
 
@@ -20,6 +21,7 @@ final class EventTapManager {
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
     private var previousFlags: CGEventFlags = []
+    private var shortcutSettings = ShortcutMappingSettings.load()
 
     var isEnabled: Bool {
         eventTap != nil
@@ -27,6 +29,7 @@ final class EventTapManager {
 
     func start() {
         guard eventTap == nil else { return }
+        reloadShortcutSettings()
 
         let eventMask = CGEventMask((1 << CGEventType.keyDown.rawValue) | (1 << CGEventType.flagsChanged.rawValue))
 
@@ -65,6 +68,10 @@ final class EventTapManager {
         runLoopSource = nil
     }
 
+    func reloadShortcutSettings() {
+        shortcutSettings = ShortcutMappingSettings.load()
+    }
+
     private func handle(type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
         if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
             if let eventTap {
@@ -90,8 +97,9 @@ final class EventTapManager {
         let flags = event.flags
         let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
 
-        if flags.contains(.maskControl), !flags.contains(.maskCommand), CommandShortcutKey(rawValue: keyCode) != nil {
-            postSyntheticShortcut(for: event, keyCode: keyCode, removing: .maskControl, adding: .maskCommand)
+        if CommandShortcutKey(rawValue: keyCode) != nil,
+           let triggerModifier = shortcutSettings.matchingModifier(for: flags) {
+            postSyntheticShortcut(for: event, keyCode: keyCode, removing: triggerModifier.flag, adding: .maskCommand)
             return nil
         }
 

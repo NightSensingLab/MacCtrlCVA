@@ -11,7 +11,9 @@ BUILD_PRODUCTS_PATH="$DERIVED_DATA_PATH/Build/Products/$CONFIGURATION"
 APP_PATH="$BUILD_PRODUCTS_PATH/MacCtrlCVA.app"
 RELEASE_DIR="$ROOT_DIR/release"
 STAGING_DIR="$RELEASE_DIR/dmg-root"
-DMG_PATH="$RELEASE_DIR/MacCtrlCVA.dmg"
+VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$ROOT_DIR/MacCtrlCVA/Info.plist")"
+DMG_NAME="MacCtrlCVA-v$VERSION.dmg"
+DMG_PATH="$RELEASE_DIR/$DMG_NAME"
 
 if ! command -v xcodebuild >/dev/null 2>&1; then
   echo "error: xcodebuild not found. Install full Xcode and select it with xcode-select."
@@ -23,13 +25,28 @@ if ! command -v hdiutil >/dev/null 2>&1; then
   exit 1
 fi
 
+if [[ -z "${DEVELOPER_DIR:-}" && -d "/Applications/Xcode.app/Contents/Developer" ]]; then
+  export DEVELOPER_DIR="/Applications/Xcode.app/Contents/Developer"
+fi
+
 echo "==> Building $SCHEME ($CONFIGURATION)"
-xcodebuild \
+if ! xcodebuild \
   -project "$PROJECT_PATH" \
   -scheme "$SCHEME" \
   -configuration "$CONFIGURATION" \
   -derivedDataPath "$DERIVED_DATA_PATH" \
-  build
+  build; then
+  echo "==> Signed build failed, retrying with code signing disabled"
+  xcodebuild \
+    -project "$PROJECT_PATH" \
+    -scheme "$SCHEME" \
+    -configuration "$CONFIGURATION" \
+    -derivedDataPath "$DERIVED_DATA_PATH" \
+    CODE_SIGNING_ALLOWED=NO \
+    CODE_SIGNING_REQUIRED=NO \
+    CODE_SIGN_IDENTITY="" \
+    build
+fi
 
 if [[ ! -d "$APP_PATH" ]]; then
   echo "error: built app not found at $APP_PATH"

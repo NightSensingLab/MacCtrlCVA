@@ -1,0 +1,6 @@
+.DS_Store
+build/
+Keys/
+release/
+MacCtrlCVA.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcuserstate
