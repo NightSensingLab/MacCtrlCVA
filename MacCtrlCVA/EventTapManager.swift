@@ -113,21 +113,33 @@ final class EventTapManager {
 
     private func handleFlagsChanged(_ event: CGEvent) -> Unmanaged<CGEvent>? {
         let currentFlags = event.flags
-        let isCtrlShiftOnly = currentFlags.contains(.maskControl) &&
+        let activeModifier = shortcutSettings.activeModifier
+        let isInputSwitchOnly = currentFlags.contains(activeModifier.flag) &&
             currentFlags.contains(.maskShift) &&
             !currentFlags.contains(.maskCommand) &&
-            !currentFlags.contains(.maskAlternate)
-        let wasCtrlShiftOnly = previousFlags.contains(.maskControl) &&
+            !currentFlags.contains(.maskAlternate) &&
+            inactiveModifierFlags(for: activeModifier).allSatisfy { !currentFlags.contains($0) }
+        let wasInputSwitchOnly = previousFlags.contains(activeModifier.flag) &&
             previousFlags.contains(.maskShift) &&
             !previousFlags.contains(.maskCommand) &&
-            !previousFlags.contains(.maskAlternate)
+            !previousFlags.contains(.maskAlternate) &&
+            inactiveModifierFlags(for: activeModifier).allSatisfy { !previousFlags.contains($0) }
 
-        guard isCtrlShiftOnly, !wasCtrlShiftOnly else {
+        guard isInputSwitchOnly, !wasInputSwitchOnly else {
             return Unmanaged.passUnretained(event)
         }
 
         inputSourceManager.selectNextInputSource()
         return nil
+    }
+
+    private func inactiveModifierFlags(for modifier: ShortcutTriggerModifier) -> [CGEventFlags] {
+        switch modifier {
+        case .control:
+            return [.maskSecondaryFn]
+        case .function:
+            return [.maskControl]
+        }
     }
 
     private func postSyntheticShortcut(

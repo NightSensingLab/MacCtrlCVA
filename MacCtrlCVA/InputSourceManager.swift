@@ -1,46 +1,24 @@
-import Carbon
+import CoreGraphics
 import Foundation
 
 final class InputSourceManager {
+    private static let inputSourceShortcutKeyCode: CGKeyCode = 49
+
     func selectNextInputSource() {
+        guard let source = CGEventSource(stateID: .hidSystemState) else {
+            return
+        }
+
         guard
-            let sources = TISCreateInputSourceList(nil, false)?.takeRetainedValue() as? [TISInputSource],
-            let current = TISCopyCurrentKeyboardInputSource()?.takeRetainedValue()
+            let keyDown = CGEvent(keyboardEventSource: source, virtualKey: Self.inputSourceShortcutKeyCode, keyDown: true),
+            let keyUp = CGEvent(keyboardEventSource: source, virtualKey: Self.inputSourceShortcutKeyCode, keyDown: false)
         else {
             return
         }
 
-        let availableSources = sources.filter { source in
-            stringValue(for: source, key: kTISPropertyInputSourceCategory) == (kTISCategoryKeyboardInputSource as String) &&
-            boolValue(for: source, key: kTISPropertyInputSourceIsEnabled) &&
-            boolValue(for: source, key: kTISPropertyInputSourceIsSelectCapable)
+        for event in [keyDown, keyUp] {
+            event.flags = [.maskControl]
+            event.post(tap: .cghidEventTap)
         }
-
-        guard
-            !availableSources.isEmpty,
-            let currentID = stringValue(for: current, key: kTISPropertyInputSourceID),
-            let currentIndex = availableSources.firstIndex(where: { stringValue(for: $0, key: kTISPropertyInputSourceID) == currentID })
-        else {
-            return
-        }
-
-        let nextIndex = availableSources.index(after: currentIndex) == availableSources.endIndex ? availableSources.startIndex : availableSources.index(after: currentIndex)
-        TISSelectInputSource(availableSources[nextIndex])
-    }
-
-    private func stringValue(for source: TISInputSource, key: CFString) -> String? {
-        guard let value = TISGetInputSourceProperty(source, key) else {
-            return nil
-        }
-
-        return Unmanaged<CFString>.fromOpaque(value).takeUnretainedValue() as String
-    }
-
-    private func boolValue(for source: TISInputSource, key: CFString) -> Bool {
-        guard let value = TISGetInputSourceProperty(source, key) else {
-            return false
-        }
-
-        return CFBooleanGetValue(Unmanaged<CFBoolean>.fromOpaque(value).takeUnretainedValue())
     }
 }

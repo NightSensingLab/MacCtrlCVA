@@ -51,47 +51,51 @@ enum ShortcutTriggerModifier: String, CaseIterable {
 }
 
 struct ShortcutMappingSettings {
-    private static let enabledModifiersKey = "shortcutMapping.enabledModifiers"
+    private static let activeModifierKey = "shortcutMapping.activeModifier"
+    private static let legacyEnabledModifiersKey = "shortcutMapping.enabledModifiers"
 
-    var enabledModifiers: Set<ShortcutTriggerModifier>
+    var activeModifier: ShortcutTriggerModifier
 
     static var defaultSettings: ShortcutMappingSettings {
-        ShortcutMappingSettings(enabledModifiers: [.control])
+        ShortcutMappingSettings(activeModifier: .control)
     }
 
     static func load() -> ShortcutMappingSettings {
         let defaults = UserDefaults.standard
-        guard let rawValues = defaults.array(forKey: enabledModifiersKey) as? [String] else {
+        if let rawValue = defaults.string(forKey: activeModifierKey),
+           let modifier = ShortcutTriggerModifier(rawValue: rawValue) {
+            return ShortcutMappingSettings(activeModifier: modifier)
+        }
+
+        guard let rawValues = defaults.array(forKey: legacyEnabledModifiersKey) as? [String] else {
             return defaultSettings
         }
 
-        let modifiers = Set(rawValues.compactMap(ShortcutTriggerModifier.init(rawValue:)))
-        guard !modifiers.isEmpty else {
+        guard let modifier = rawValues.compactMap(ShortcutTriggerModifier.init(rawValue:)).first else {
             return defaultSettings
         }
 
-        return ShortcutMappingSettings(enabledModifiers: modifiers)
+        let migratedSettings = ShortcutMappingSettings(activeModifier: modifier)
+        migratedSettings.save()
+        defaults.removeObject(forKey: legacyEnabledModifiersKey)
+        return migratedSettings
     }
 
     func save() {
-        let rawValues = enabledModifiers.map(\.rawValue).sorted()
-        UserDefaults.standard.set(rawValues, forKey: Self.enabledModifiersKey)
+        UserDefaults.standard.set(activeModifier.rawValue, forKey: Self.activeModifierKey)
+        UserDefaults.standard.removeObject(forKey: Self.legacyEnabledModifiersKey)
     }
 
     static func reset() {
-        UserDefaults.standard.removeObject(forKey: enabledModifiersKey)
+        UserDefaults.standard.removeObject(forKey: activeModifierKey)
+        UserDefaults.standard.removeObject(forKey: legacyEnabledModifiersKey)
     }
 
     func matchingModifier(for flags: CGEventFlags) -> ShortcutTriggerModifier? {
-        ShortcutTriggerModifier.allCases.first { modifier in
-            enabledModifiers.contains(modifier) && modifier.matches(flags)
-        }
+        activeModifier.matches(flags) ? activeModifier : nil
     }
 
     var summary: String {
-        ShortcutTriggerModifier.allCases
-            .filter { enabledModifiers.contains($0) }
-            .map(\.displayName)
-            .joined(separator: " / ")
+        activeModifier.displayName
     }
 }

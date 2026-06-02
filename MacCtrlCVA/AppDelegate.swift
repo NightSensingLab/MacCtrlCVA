@@ -237,7 +237,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
             Windows-style shortcut remapping for macOS:
             configurable copy/paste/cut/select-all/undo shortcuts,
-            Option+Tab, and Ctrl+Shift input switching.
+            Option+Tab, and mode-aware input switching.
             """
         )
     }
@@ -251,13 +251,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        var settings = ShortcutMappingSettings.load()
-        if settings.enabledModifiers.contains(modifier), settings.enabledModifiers.count > 1 {
-            settings.enabledModifiers.remove(modifier)
-        } else {
-            settings.enabledModifiers.insert(modifier)
-        }
-
+        let settings = ShortcutMappingSettings(activeModifier: modifier)
         settings.save()
         eventTapManager.reloadShortcutSettings()
         refreshShortcutMappingMenuState()
@@ -272,9 +266,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func refreshShortcutMappingMenuState() {
         let settings = ShortcutMappingSettings.load()
-        controlShortcutMenuItem.state = settings.enabledModifiers.contains(.control) ? .on : .off
-        functionShortcutMenuItem.state = settings.enabledModifiers.contains(.function) ? .on : .off
-        shortcutMappingSummaryMenuItem.title = "Editing shortcuts: \(settings.summary) + C/V/X/A/Z"
+        controlShortcutMenuItem.state = settings.activeModifier == .control ? .on : .off
+        functionShortcutMenuItem.state = settings.activeModifier == .function ? .on : .off
+        shortcutMappingSummaryMenuItem.title = "Editing: \(settings.summary) + C/V/X/A/Z, Input: \(settings.summary) + Shift"
     }
 
     @objc
